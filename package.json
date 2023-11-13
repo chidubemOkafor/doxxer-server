@@ -5,7 +5,6 @@
   "devDependencies": {
     "bun-types": "latest"
   },
-
   "scripts": {
     "run": "bun run index.ts"
   },
@@ -17,6 +16,7 @@
     "@types/cors": "^2.8.14",
     "@types/express": "^4.17.19",
     "@types/firebase": "^3.2.1",
+    "@types/multer": "^1.4.10",
     "@types/nodemailer": "^6.4.11",
     "@types/speakeasy": "^2.0.8",
     "cors": "^2.8.5",
@@ -24,6 +24,7 @@
     "firebase": "^10.5.2",
     "mongodb": "^6.1.0",
     "mongoose": "^7.6.1",
+    "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.6",
     "speakeasy": "^2.0.0"
   }

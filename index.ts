@@ -1,7 +1,8 @@
 import express from "express";
-import {Verify,User} from "./schema/schema";
+import {Verify,User,RequestDoxxer} from "./schema/schema";
 import  "./db";
 import cors from 'cors'
+import multer from 'multer'
 
 const PORT: number = 7000
 const app = express()
@@ -61,7 +62,6 @@ app.get('/api/verifyRequests/:id', async (req, res) => {
     }
 });
   
-
 app.get('/api/getVerify', async(req,res) => {
   try {
     const all = await Verify.find({})
@@ -141,7 +141,6 @@ app.get('/api/approvedProjects/:searchText', async (req, res) => {
   }
 });
 
-
 app.get('/api/login/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -160,37 +159,48 @@ app.get('/api/login/:id', async (req, res) => {
 });
 
 app.get('/api/profile/:id', async(req,res) => {
-    try {
-        const {id} = req.params
-        const profile = await User.findOne({_id: id})
-        if(!profile) {
-            res.status(200).json({message: "failed", result: "account not found"})
-            console.log("account not found")
-        }
-        res.status(200).json({message: "success", result: profile})
-        console.log(profile)
-    } catch(error) {
-        res.status(500).json({message: "internal server error", result: error})
-        console.error(error)
-    }
+  try {
+      const {id} = req.params
+      const profile = await User.findOne({_id: id})
+      if(!profile) {
+          res.status(200).json({message: "failed", result: "account not found"})
+          console.log("account not found")
+      }
+      res.status(200).json({message: "success", result: profile})
+      console.log(profile)
+  } catch(error) {
+      res.status(500).json({message: "internal server error", result: error})
+      console.error(error)
+  }
 })
 
 app.post('/api/createAccount', async (req, res) => {
-  const {firebaseAccountId, accountData} = req.body
-  const {first_name, last_name, email_address} = accountData
-  console.log(req.body)
+  try {
+    const {firebaseAccountId, accountData} = req.body
+    const {first_name, last_name, email_address} = accountData
+    const createNewAccount = new User({user_id:firebaseAccountId, last_name, first_name, email_address});
+    const newSavedUser = await createNewAccount.save();
+    console.log(newSavedUser);
+    res.status(200).json({ message: "success", result: newSavedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "internal server error:", result: error });
+  }
+});
 
-      try {
-        const createNewAccount = new User({user_id:firebaseAccountId, last_name, first_name, email_address});
-        const newSavedUser = await createNewAccount.save();
-        console.log(newSavedUser);
-        res.status(200).json({ message: "success", result: newSavedUser });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "internal server error:", result: error });
-    }
-  });
+app.post('/api/requestSuperUserRole', async(req,res) => {
+  try {
+    const {reqDoxMessage} = req.body;
+    console.log(reqDoxMessage)
+    const newRequest = new RequestDoxxer({github: reqDoxMessage.gitHubLink, reason: reqDoxMessage.reasonValue, cv: reqDoxMessage.cv, id: reqDoxMessage.id})
+    const savedRequest = await newRequest.save()
+    res.status(200).json({ message: "success", result: savedRequest });
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: "internal server error:", result: error });
+  }
+})
 
 app.listen(PORT,()=> {
-     console.log('app listining on port: ',PORT)
+    console.log('app listining on port: ',PORT)
 })

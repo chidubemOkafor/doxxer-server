@@ -10,6 +10,14 @@ const userSchema: Schema = new Schema({
     role: {type: String, default: "user"}  // Admin, superuser, user
 })
 
+const requestDoxxerSchema: Schema = new Schema({
+    id: {type: String, required:true},
+    reason: {type: String, required: true},
+    github: {type: String, required: true},
+    cv: {type: String, required:true},
+    status: {type: String, required:true}
+})
+
 const verifySchema: Schema = new Schema({
     amount_of_team_members: {type: Number, required: true},
     chain: {type: String, required: true},
@@ -32,4 +40,5 @@ const verifySchema: Schema = new Schema({
 
  export const Verify = mongoose.model('Verify', verifySchema)
  export const User = mongoose.model('User', userSchema)
+ export const RequestDoxxer = mongoose.model('requestDoxxer',requestDoxxerSchema)
 
