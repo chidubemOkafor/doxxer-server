@@ -192,6 +192,12 @@ app.post('/api/requestSuperUserRole', async(req,res) => {
   try {
     const {reqDoxMessage} = req.body;
     console.log(reqDoxMessage)
+    const existingRequest = await RequestDoxxer.findOne({id: reqDoxMessage.id})
+
+    if(existingRequest?.status == "pending") {
+      res.status(409).json({message: "Resource already exists"})
+    }
+
     const newRequest = new RequestDoxxer({github: reqDoxMessage.gitHubLink, reason: reqDoxMessage.reasonValue, cv: reqDoxMessage.cv, id: reqDoxMessage.id})
     const savedRequest = await newRequest.save()
     res.status(200).json({ message: "success", result: savedRequest });

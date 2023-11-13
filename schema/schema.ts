@@ -15,7 +15,7 @@ const requestDoxxerSchema: Schema = new Schema({
     reason: {type: String, required: true},
     github: {type: String, required: true},
     cv: {type: String, required:true},
-    status: {type: String, required:true}
+    status: {type: String, default: "pending"}
 })
 
 const verifySchema: Schema = new Schema({
