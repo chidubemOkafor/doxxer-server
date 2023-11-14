@@ -11,7 +11,7 @@ const userSchema: Schema = new Schema({
 })
 
 const requestDoxxerSchema: Schema = new Schema({
-    id: {type: String, required:true},
+    user: { type: Schema.Types.ObjectId, ref: 'user', required: true },
     reason: {type: String, required: true},
     github: {type: String, required: true},
     cv: {type: String, required:true},

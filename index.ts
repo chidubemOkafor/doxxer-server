@@ -192,18 +192,34 @@ app.post('/api/requestSuperUserRole', async(req,res) => {
   try {
     const {reqDoxMessage} = req.body;
     console.log(reqDoxMessage)
-    const existingRequest = await RequestDoxxer.findOne({id: reqDoxMessage.id})
+    const existingRequest = await RequestDoxxer.findOne({user: reqDoxMessage.id})
 
     if(existingRequest?.status == "pending") {
       res.status(409).json({message: "Resource already exists"})
     }
-
-    const newRequest = new RequestDoxxer({github: reqDoxMessage.gitHubLink, reason: reqDoxMessage.reasonValue, cv: reqDoxMessage.cv, id: reqDoxMessage.id})
+    const newRequest = new RequestDoxxer({github: reqDoxMessage.gitHubLink, reason: reqDoxMessage.reasonValue, cv: reqDoxMessage.cv, user: reqDoxMessage.id})
     const savedRequest = await newRequest.save()
     res.status(200).json({ message: "success", result: savedRequest });
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: "internal server error:", result: error });
+  }
+})
+
+app.get('/api/getSuperUsersRequest', async(req,res) => {
+  try {
+    console.log('working')
+    const requestApplication = await RequestDoxxer.find({}).populate('user', 'first_name email_address');
+    console.log(requestApplication)
+    if(requestApplication.length === 0) {
+      res.status(404).json({ message: "Resource not found" })
+      return;
+    }
+
+    res.status(200).json({ message: "success", result: requestApplication})
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({messsage: "internal server error:", result: error });
   }
 })
 

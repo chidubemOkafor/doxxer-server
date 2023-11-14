@@ -3,10 +3,12 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "ts-node": "^10.9.1"
   },
   "scripts": {
-    "run": "bun run index.ts"
+    "run": "bun run index.ts",
+    "move": "nodemon index.ts"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -26,6 +28,7 @@
     "mongoose": "^7.6.1",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.6",
+    "nodemon": "^3.0.1",
     "speakeasy": "^2.0.0"
   }
 }
