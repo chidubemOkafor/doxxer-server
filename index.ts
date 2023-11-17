@@ -196,10 +196,19 @@ app.post('/api/requestSuperUserRole', async(req,res) => {
 
     if(existingRequest?.status == "pending") {
       res.status(409).json({message: "Resource already exists"})
+    } else {
+      const newRequest = new RequestDoxxer(
+        {
+          first_name: reqDoxMessage.firstName, 
+          email_address: reqDoxMessage.email, 
+          github: reqDoxMessage.gitHubLink, 
+          reason: reqDoxMessage.reasonValue, 
+          cv: reqDoxMessage.cv, 
+          user: reqDoxMessage.id
+        })
+      const savedRequest = await newRequest.save()
+      res.status(200).json({ message: "success", result: savedRequest })
     }
-    const newRequest = new RequestDoxxer({github: reqDoxMessage.gitHubLink, reason: reqDoxMessage.reasonValue, cv: reqDoxMessage.cv, user: reqDoxMessage.id})
-    const savedRequest = await newRequest.save()
-    res.status(200).json({ message: "success", result: savedRequest });
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: "internal server error:", result: error });
@@ -209,7 +218,7 @@ app.post('/api/requestSuperUserRole', async(req,res) => {
 app.get('/api/getSuperUsersRequest', async(req,res) => {
   try {
     console.log('working')
-    const requestApplication = await RequestDoxxer.find({}).populate('user', 'first_name email_address');
+    const requestApplication = await RequestDoxxer.find({});
     console.log(requestApplication)
     if(requestApplication.length === 0) {
       res.status(404).json({ message: "Resource not found" })
@@ -218,6 +227,48 @@ app.get('/api/getSuperUsersRequest', async(req,res) => {
 
     res.status(200).json({ message: "success", result: requestApplication})
   } catch (error) {
+    console.error(error)
+    res.status(500).json({messsage: "internal server error:", result: error });
+  }
+})
+
+app.post('/api/approveOrRejectDoxRequest/:id', async(req,res) => {
+  try {
+     const {id} = req.params
+     const {requestData} = req.body
+  
+     const requestWithId = await RequestDoxxer.findOne({_id: id})
+
+     if(!requestWithId) {
+        console.log("not found")
+        res.status(404).json({message: "not found"})
+     } else {
+     if(requestData.status === "Approve" || requestData.status === "Reject") {
+      requestWithId.status = requestData.status
+      await requestWithId?.save()
+      
+      // this is where i check if the user is available so that i can change the role to superuser if it has been approved
+      if(requestWithId.status === "Approve") {
+         const fetchUser = await User.findOne({_id: requestWithId.user})
+         if(!fetchUser) {
+            console.log("user does not exist")
+            res.status(404).json({message: "this user does not exist"})
+         } else {
+         fetchUser.role == "superuser"
+         await fetchUser.save()
+         }
+      }
+
+      return res.status(200).json({
+        message: "success",
+        result: requestWithId,
+      });
+
+     } else {
+      return res.status(400).json({ message: "Invalid status" });
+     }
+    }
+  } catch(error) {
     console.error(error)
     res.status(500).json({messsage: "internal server error:", result: error });
   }
