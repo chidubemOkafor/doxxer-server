@@ -254,7 +254,7 @@ app.post('/api/approveOrRejectDoxRequest/:id', async(req,res) => {
             console.log("user does not exist")
             res.status(404).json({message: "this user does not exist"})
          } else {
-         fetchUser.role == "superuser"
+         fetchUser.role = "superuser"
          await fetchUser.save()
          }
       }
