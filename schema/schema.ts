@@ -10,6 +10,10 @@ const userSchema: Schema = new Schema({
     role: {type: String, default: "user"}  // Admin, superuser, user
 })
 
+const userWaitList: Schema = new Schema({
+    email: {type: String, required: true}
+})
+
 const requestDoxxerSchema: Schema = new Schema({
     user: { type: Schema.Types.ObjectId, ref: 'user', required: true },
     first_name: {type: String, required: true},
@@ -43,4 +47,5 @@ const verifySchema: Schema = new Schema({
  export const Verify = mongoose.model('Verify', verifySchema)
  export const User = mongoose.model('User', userSchema)
  export const RequestDoxxer = mongoose.model('requestDoxxer',requestDoxxerSchema)
+ export const WaitList = mongoose.model('waitlist',userWaitList)
 

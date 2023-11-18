@@ -1,5 +1,5 @@
 import express from "express";
-import {Verify,User,RequestDoxxer} from "./schema/schema";
+import {Verify,User,RequestDoxxer, WaitList} from "./schema/schema";
 import  "./db";
 import cors from 'cors'
 import multer from 'multer'
@@ -235,10 +235,13 @@ app.get('/api/getSuperUsersRequest', async(req,res) => {
 app.post('/api/approveOrRejectDoxRequest/:id', async(req,res) => {
   try {
      const {id} = req.params
-     const {requestData} = req.body
-  
-     const requestWithId = await RequestDoxxer.findOne({_id: id})
+     const {requestData,_id} = req.body
+     console.log(_id)
+     // get the admin account first
+     const adminAccount = await User.findOne({_id})
+     if(adminAccount && adminAccount.role === "Admin") {
 
+     const requestWithId = await RequestDoxxer.findOne({_id: id})
      if(!requestWithId) {
         console.log("not found")
         res.status(404).json({message: "not found"})
@@ -268,12 +271,31 @@ app.post('/api/approveOrRejectDoxRequest/:id', async(req,res) => {
       return res.status(400).json({ message: "Invalid status" });
      }
     }
+  } else {
+    return res.status(400).json({message: "you don't have admin access"})
+  }
   } catch(error) {
     console.error(error)
     res.status(500).json({messsage: "internal server error:", result: error });
   }
 })
 
+// adding people to the waitlist schema
+app.post('/api/addToWaitlist', async(req,res) => {
+  const {email} = req.body
+   try {
+    const EmailExist = await WaitList.findOne({email})
+    if(!EmailExist) { 
+      res.status(400).json({message: "email already whitelisted"})
+    }
+    const addEmail = new WaitList({email})
+    const addedEmail = await addEmail.save()
+    console.log(addedEmail)
+    res.status(200).json({message: "added to waitlist", result: addedEmail})
+   } catch(error) {
+    console.error(error)
+   }
+})
 app.listen(PORT,()=> {
     console.log('app listining on port: ',PORT)
 })
